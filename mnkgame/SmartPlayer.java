@@ -42,108 +42,86 @@ public class SmartPlayer implements MNKPlayer {
     public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
         long start = System.currentTimeMillis();
         MNKCell c;
-        if(MC.length > 0) {
-            c = MC[MC.length-1]; // Recover the last move from MC
-            B.markCell(c.i,c.j);         // Save the last move in the local MNKBoard
+        if (MC.length > 0) {
+            c = MC[MC.length - 1]; // Recover the last move from MC
+            B.markCell(c.i, c.j); // Save the last move in the local MNKBoard
         }
-        c=iterativeDeepening(FC, MC, start);
-        if(c==null){
-            c = FC[rand.nextInt(FC.length)];
-			B.markCell(c.i,c.j);
-        }
-        return c;
-    }
 
-    public MNKCell iterativeDeepening(MNKCell[] FC, MNKCell[] MC, long startTime){
-        int d = 0, alpha = -1, beta = 1, eval = -2;
-        boolean found = false;
-        int depth = FC.length;
-        MNKCell c;
-        while((System.currentTimeMillis()-startTime)/1000.0 <= TIMEOUT*(80.0/100.0) && !found && d < depth){
-            //alphabeta pruning
-            c = FC[d];
+        /*if(FC.length == 1){
+            c = FC[0];
             B.markCell(c.i, c.j);
-            eval = alphabetaPruning(FC, MC, false, alpha, beta, depth);
-            if(eval==1) return c;
-            else{
-                B.unmarkCell();
-            }
-            d++;
-        }
-        return null;
+            return c;
+        }*/
 
+
+        MNKCell bestMove = FC[0];
+        double res = Double.NEGATIVE_INFINITY;
+        double alphabeta = 0;
+        for(int k = 0; k < FC.length; k++) {
+            c = FC[k];
+            B.markCell(c.i, c.j);
+            alphabeta = alphaBeta(FC, !(myWin == MNKGameState.WINP1), 0,0);
+            B.unmarkCell();
+            if(alphabeta > res){
+                bestMove = FC[k];
+            }
+        }
+        B.markCell(bestMove.i, bestMove.j);
+        return bestMove;
     }
 
-    public int alphabetaPruning(MNKCell[] FC, MNKCell[] MC, boolean PlayerA, int alpha, int beta, int depth){
-        int eval=0;
-        if(FC.length == 1){
-            MNKCell c = FC[0];
-            if(B.markCell(c.i, c.j) == myWin){
-                B.unmarkCell();
-                return 1;
-            }
-            else if(B.markCell(c.i, c.j) == yourWin){
-                B.unmarkCell();
-                return -1;
-            }
+    //Errore cella 1,1 piena, secondo me perché non aggiorna mai FC, anche se dovrebbe, se si fa controllo
+    //affinché la cella che si marchi non sia piena, l'algoritmo non funziona bene.
+
+    public double alphaBeta(MNKCell[] FC, boolean isMaximizing, double alpha, double beta){
+        //Stampa FreeCells
+        for (int k = 0; k < FC.length; k++) {
+            System.out.println(FC[k].toString());
+        }
+        System.out.println("");
+
+        MNKGameState res = B.gameState();
+        if(res != MNKGameState.OPEN){
+            if(res == myWin) return 1;
+            else if(res == yourWin) return -1;
             else return 0;
         }
-
-        if(FC.length > 0){
-            MNKCell c = FC[0];
-            if(B.markCell(c.i, c.j) == myWin){
-                B.unmarkCell();
-                return 1;
-            }
-            else if(B.markCell(c.i, c.j) == yourWin){
-                B.unmarkCell();
-                return -1;
-            }
-        }
-        
-        if(PlayerA){
-            eval=-2;
-            for (int i=0; i<FC.length; i++){
-                MNKCell c = FC[i];
+        if(isMaximizing){
+            double eval = Double.NEGATIVE_INFINITY;
+            for(int k = 0; k < FC.length; k++) {
+                MNKCell c = FC[k];
                 B.markCell(c.i, c.j);
-                
-                eval=Max(alphabetaPruning(FC, MC, !PlayerA, alpha, beta, depth-1), eval);
-                alpha=Max(alpha, eval);
+                double tmpRes = max(eval, alphaBeta(FC,false, alpha, beta));
+                eval = max(eval, tmpRes);
                 B.unmarkCell();
-                if(alpha>=beta) break; 
-                
+                alpha = max(eval, alpha);
+                if (beta <= alpha) break;
             }
-        }
-        else{
-            eval=2;
-            for (int i=0; i<FC.length; i++){
-                MNKCell c = FC[i];
+            return eval;
+        }else{
+            double eval = Double.POSITIVE_INFINITY;
+            for(int k = 0; k < FC.length; k++) {
+                MNKCell c = FC[k];
                 B.markCell(c.i, c.j);
-                
-                eval=Min(alphabetaPruning(FC, MC, !PlayerA, alpha, beta, depth-1), eval);
-                beta=Min(beta, eval);
+                double tmpRes = min(eval, alphaBeta(FC, true, alpha, beta));
+                eval = min(eval, tmpRes);
                 B.unmarkCell();
-                if(alpha>=beta) break; 
+                beta = min(eval, beta);
+                if(beta <= alpha) break;
             }
+            return eval;
         }
-        return eval;
-
-        
-        
-
     }
 
-    private int Min(int n1, int n2) {
-        if(n1<n2) return n1;
-        else return n2;
+    public double max(double n, double m){
+        if(n >= m) return n;
+        else return m;
     }
 
-
-    private int Max(int n1, int n2) {
-        if(n1>n2) return n1;
-        else return n2;
+    public double min(double n, double m){
+        if(n <= m) return n;
+        else return m;
     }
-
 
     public String playerName() {
         return "SmartPlayer";
