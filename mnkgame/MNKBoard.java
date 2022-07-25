@@ -228,7 +228,8 @@ public class MNKBoard {
 	}
 
 	// Check winning state from cell i, j
-	private boolean isWinningCell(int i, int j) {
+	//MESSO PUBBLICO PERCHE' USATO, RICOPIARE IN SmartPlayerTest
+	public boolean isWinningCell(int i, int j) {
 		MNKCellState s = B[i][j];
 		int n;
 

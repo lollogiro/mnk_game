@@ -2,9 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a90941cd-6c5a-4532-b212-da06232032d8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/mnkgame/SmartPlayerTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mnkgame/SmartPlayer.class" beforeDir="false" afterPath="$PROJECT_DIR$/mnkgame/SmartPlayer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mnkgame/SmartPlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/mnkgame/SmartPlayer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mnkgame/MNKBoard.class" beforeDir="false" afterPath="$PROJECT_DIR$/mnkgame/MNKBoard.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mnkgame/MNKBoard.java" beforeDir="false" afterPath="$PROJECT_DIR$/mnkgame/MNKBoard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mnkgame/SmartPlayerTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/mnkgame/SmartPlayerTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mnkgame/SmartPlayerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/mnkgame/SmartPlayerTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,6 +61,8 @@
       <workItem from="1658319419861" duration="7907000" />
       <workItem from="1658331816411" duration="1524000" />
       <workItem from="1658391414218" duration="1037000" />
+      <workItem from="1658742420424" duration="722000" />
+      <workItem from="1658779942840" duration="30000" />
     </task>
     <servers />
   </component>
