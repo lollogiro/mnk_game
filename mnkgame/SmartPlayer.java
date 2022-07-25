@@ -47,39 +47,45 @@ public class SmartPlayer implements MNKPlayer {
             B.markCell(c.i, c.j); // Save the last move in the local MNKBoard
         }
 
-        /*if(FC.length == 1){
+        if(FC.length == 1){
             c = FC[0];
             B.markCell(c.i, c.j);
             return c;
-        }*/
-
+        }
 
         MNKCell bestMove = FC[0];
         double res = Double.NEGATIVE_INFINITY;
-        double alphabeta = 0;
+
         for(int k = 0; k < FC.length; k++) {
             c = FC[k];
             B.markCell(c.i, c.j);
-            alphabeta = alphaBeta(FC, !(myWin == MNKGameState.WINP1), 0,0);
-            B.unmarkCell();
-            if(alphabeta > res){
-                bestMove = FC[k];
+            FC = B.getFreeCells();
+
+            for (int l = k; l < FC.length; l++) {
+                System.out.println(FC[l].toString());
             }
+            System.out.println("\n");
+
+
+            double alphabeta = alphaBeta(FC, MC, false, Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY);
+            System.out.println("Cella:"+c.toString()+" Esito:"+alphabeta+"\n");
+            B.unmarkCell();
+
+            FC = B.getFreeCells();
+
+            if(alphabeta > res) {
+                res = alphabeta;
+                bestMove = c;
+            }
+
         }
+        System.out.println("Cella scelta:"+bestMove.toString()+" Esito:"+res);
+        System.out.println("------------------------------------");
         B.markCell(bestMove.i, bestMove.j);
         return bestMove;
     }
 
-    //Errore cella 1,1 piena, secondo me perché non aggiorna mai FC, anche se dovrebbe, se si fa controllo
-    //affinché la cella che si marchi non sia piena, l'algoritmo non funziona bene.
-
-    public double alphaBeta(MNKCell[] FC, boolean isMaximizing, double alpha, double beta){
-        //Stampa FreeCells
-        for (int k = 0; k < FC.length; k++) {
-            System.out.println(FC[k].toString());
-        }
-        System.out.println("");
-
+    public double alphaBeta(MNKCell[] FC, MNKCell[] MC, boolean isMaximizing, double alpha, double beta){
         MNKGameState res = B.gameState();
         if(res != MNKGameState.OPEN){
             if(res == myWin) return 1;
@@ -91,9 +97,11 @@ public class SmartPlayer implements MNKPlayer {
             for(int k = 0; k < FC.length; k++) {
                 MNKCell c = FC[k];
                 B.markCell(c.i, c.j);
-                double tmpRes = max(eval, alphaBeta(FC,false, alpha, beta));
-                eval = max(eval, tmpRes);
+                FC = B.getFreeCells();
+                double tmpRes = max(eval, alphaBeta(FC, MC, false, alpha, beta));
                 B.unmarkCell();
+                eval = max(eval, tmpRes);
+                FC = B.getFreeCells();
                 alpha = max(eval, alpha);
                 if (beta <= alpha) break;
             }
@@ -103,23 +111,25 @@ public class SmartPlayer implements MNKPlayer {
             for(int k = 0; k < FC.length; k++) {
                 MNKCell c = FC[k];
                 B.markCell(c.i, c.j);
-                double tmpRes = min(eval, alphaBeta(FC, true, alpha, beta));
-                eval = min(eval, tmpRes);
+                FC = B.getFreeCells();
+                double tmpRes = min(eval, alphaBeta(FC, MC, true, alpha, beta));
                 B.unmarkCell();
+                eval = min(eval, tmpRes);
+                FC = B.getFreeCells();
                 beta = min(eval, beta);
-                if(beta <= alpha) break;
+                if (beta <= alpha) break;
             }
             return eval;
         }
     }
 
     public double max(double n, double m){
-        if(n >= m) return n;
+        if(n > m) return n;
         else return m;
     }
 
     public double min(double n, double m){
-        if(n <= m) return n;
+        if(n < m) return n;
         else return m;
     }
 
