@@ -2,6 +2,12 @@ package mnkgame;
 
 import java.util.*;
 
+enum winType {
+    PLAYER,
+    OPPONENT,
+    NONE
+}
+
 class Pair implements Comparable<Pair> {
     public Integer count;
     public MNKCell cell;
@@ -146,7 +152,7 @@ public class SmartPlayerTest implements MNKPlayer {
 
         //Fill MaxPriorityQueue
         for (MNKCell i : FC) {
-            helpfulnessPQueue.add(new Pair(-1000, i));
+            helpfulnessPQueue.add(new Pair(0, i));
         }
 
         //Calculating Helpfulness updating the MaxPriorityQueue considering K rows with Free Cells at the start and or the end of the row
@@ -154,20 +160,20 @@ public class SmartPlayerTest implements MNKPlayer {
         for (MNKCell i : FC) {
             int startX = i.i;
             int startY = i.j;
-
+            
             //ORIZZONTALE CON cella i a sinistra
             connectedCell = 1;
             for (int k = 1; k < B.K; k++) {
                 if (startY + k >= B.N) break;
                 else if (isUsable(MC, FC, player, startX, startY + k)) {
                     connectedCell++;
-                    if (isFree(MC, startX, startY + k)) markedCellsUsed++;
+                    if (!isFree(MC, startX, startY + k)) markedCellsUsed++;
                 } else break;
             }
             if (connectedCell == B.K) {
                 System.out.println(i.toString() + " orizzontale con i a sinistra");
-                for (int k = 1; k < B.K; k++) {
-                    getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY + k);
+                if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                    break;
                 }
             }
 
@@ -747,7 +753,7 @@ public class SmartPlayerTest implements MNKPlayer {
         return choosenCell.cell;
     }
 
-    public void getFreeCellsHelpfulness(MNKCell[] FC, PriorityQueue<Pair> helpfulnessPQueue, boolean opponent, int markedCellsUsed, int offsetX, int offsetY) {
+    public winType getFreeCellsHelpfulness(MNKCell[] FC, PriorityQueue<Pair> helpfulnessPQueue, boolean opponent, int markedCellsUsed, int offsetX, int offsetY) {
         MNKCell c = findCell(FC, offsetX, offsetY);
         if (c != null) {
             Object[] toUpdate = helpfulnessPQueue.toArray();
@@ -762,17 +768,24 @@ public class SmartPlayerTest implements MNKPlayer {
                 it++;
             }
             helpfulnessPQueue.removeIf(p -> p.compareCells(new Pair(0, c)));
-            if (originalCount == -1000) originalCount = 0;
-
             if (B.gameState == MNKGameState.OPEN) {
                 B.markCell(c.i, c.j);
-                if (B.isWinningCell(c.i, c.j) && !opponent) markedCellsUsed = markedCellsUsed + 1000;
-                else if (B.isWinningCell(c.i, c.j) && opponent) markedCellsUsed = markedCellsUsed + 100;
+                if (B.isWinningCell(c.i, c.j) && !opponent){
+                    markedCellsUsed = markedCellsUsed + 10000;
+                    helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, c));
+                    return winType.PLAYER;
+                }
+                else if (B.isWinningCell(c.i, c.j) && opponent){ 
+                    markedCellsUsed = markedCellsUsed + 1000;
+                    helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, c));
+                    return winType.OPPONENT;
+                }
                 B.unmarkCell();
             }
 //            System.out.println("MarkedCellsUsed:"+markedCellsUsed);
             helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, c));
         }
+        return winType.NONE;
     }
 
 
@@ -818,3 +831,4 @@ public class SmartPlayerTest implements MNKPlayer {
         return "SmartPlayerTest";
     }
 }
+
