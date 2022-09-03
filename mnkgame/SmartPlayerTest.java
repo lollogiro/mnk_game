@@ -56,10 +56,10 @@ public class SmartPlayerTest implements MNKPlayer {
 
     public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
         // New random seed for each game
-        rand = new Random(System.currentTimeMillis());
-        B = new MNKBoard(M, N, K);
+        rand    = new Random(System.currentTimeMillis());
+        B       = new MNKBoard(M,N,K);
         this.first = first;
-        myWin = first ? MNKGameState.WINP1 : MNKGameState.WINP2;
+        myWin   = first ? MNKGameState.WINP1 : MNKGameState.WINP2;
         yourWin = first ? MNKGameState.WINP2 : MNKGameState.WINP1;
         TIMEOUT = timeout_in_secs;
     }
@@ -83,7 +83,7 @@ public class SmartPlayerTest implements MNKPlayer {
 
         c = FC[0];
 
-        if (FC.length == 1) {
+        if(FC.length == 1){
             c = FC[0];
             B.markCell(c.i, c.j);
             return c;
@@ -92,6 +92,11 @@ public class SmartPlayerTest implements MNKPlayer {
         //Se si parte secondo, FORSE è possibile fare K-1 mosse random senza perdere, questo potrebbe ovviare a problemi
         //di velocità dell'alagoritmo con tabelle di grandi dimensioni
 
+        //Su grandi dimensioni, da 8x8 l'algoritmo è un pò lento, ma soprattutto non vince mai, una soluzione potrebbe
+        //essere quella di eseguire l'algoritmo su 4 parti della tabella indipendentemente, questo finché il numero di
+        //celle da valutare non si abbassa fino ad un certo lower bound, es. fino a 25 celle libere!!!, prima eseguendo
+        //l'algoritmo sulla porzione in alto a destra, in alto a sinistra, in basso a destra, in basso a sinistra
+        //indipendentemente. Magari funziona meglio e riesce a fare della giocate migliori.
 
         //Fatto per sicurezza
         FC = B.getFreeCells();
@@ -102,37 +107,20 @@ public class SmartPlayerTest implements MNKPlayer {
                 new PriorityQueue<Pair>(Collections.reverseOrder());
 
         //Fill MaxPriorityQueue
-        for (MNKCell i : FC) {
+        for(MNKCell i : FC){
             smartPlayerPQueue.add(new Pair(-1000, i));
         }
 
         MNKCellState smartPlayerTurn = first ? MNKCellState.P1 : MNKCellState.P2;
-        MNKCellState oppositePlayerTurn = first ? MNKCellState.P2 : MNKCellState.P1;
+        //MNKCellState oppositePlayerTurn = first ? MNKCellState.P2 : MNKCellState.P1;
 
         //IMPORTANTE!!!
         //Utilizzato una "euristica casalinga" che somma anche le markeCells utilizzate, questo aumenta la probabilità che
         //l'algoritmo scelga una cella più vicina alla vincita rispetto ad altre, DA MIGLIORARE, cercando un moltiplicatore
-        //variabile da moltiplicare alle markedCellsUsed
+        //variabile da moltiplicare alle markedCellsUsed, modificare i valori studiando meglio le varie situazioni.
 
-        /*PriorityQueue<Pair> smartPlayerPQueue*/
         c = calculateHelpfulness(MC, FC, smartPlayerTurn);
-        //PriorityQueue<Pair> oppositePlayerPQUeue = calculateHelpfulness(MC, FC, oppositePlayerTurn);
 
-//        MNKCell[] originalFC = FC;
-//        for(MNKCell i : originalFC){
-//            B.markCell(i.i, i.j);
-//            FC = B.getFreeCells();
-//            MC = B.getMarkedCells();
-//
-//            B.unmarkCell();
-//        }
-
-        //Union of the 2 PQueue
-        //Object[] smartPlayerObject = smartPlayerPQueue.toArray();
-        //Object[] oppositePlayerObject = oppositePlayerPQUeue.toArray();
-        //TODO: unire le due PQueue così da averne una con i count
-
-        //c = smartPlayerPQueue.peek().cell;
 
         B.markCell(c.i, c.j);
         return c;
@@ -160,7 +148,7 @@ public class SmartPlayerTest implements MNKPlayer {
         for (MNKCell i : FC) {
             int startX = i.i;
             int startY = i.j;
-            
+
             //ORIZZONTALE CON cella i a sinistra
             connectedCell = 1;
             for (int k = 1; k < B.K; k++) {
@@ -179,113 +167,120 @@ public class SmartPlayerTest implements MNKPlayer {
 
             //ORIZZONTALE con cella i a destra
             connectedCell = 1;
+            markedCellsUsed = 0;
             for (int k = 1; k < B.K; k++) {
                 if (startY - k < 0) break;
                 else if (isUsable(MC, FC, player, startX, startY - k)) {
                     connectedCell++;
-                    if (isFree(MC, startX, startY - k)) markedCellsUsed++;
+                    if (!isFree(MC, startX, startY - k)) markedCellsUsed++;
                 } else break;
             }
             if (connectedCell == B.K) {
                 System.out.println(i.toString() + " orizzontale con i a destra");
-                for (int k = 1; k < B.K; k++) {
-                    getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY - k);
+                if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                    break;
                 }
             }
 
             //VERTICALE CON cella i in alto
             connectedCell = 1;
+            markedCellsUsed = 0;
             for (int k = 1; k < B.K; k++) {
                 if (startX + k >= B.M) break;
                 else if (isUsable(MC, FC, player, startX + k, startY)) {
                     connectedCell++;
-                    if (isFree(MC, startX + k, startY)) markedCellsUsed++;
+                    if (!isFree(MC, startX + k, startY)) markedCellsUsed++;
                 } else break;
             }
             if (connectedCell == B.K) {
                 System.out.println(i.toString() + " verticale con i in alto");
-                for (int k = 1; k < B.K; k++) {
-                    getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX + k, startY);
+                if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                    break;
                 }
             }
 
             //VERTICALE con cella i in basso
             connectedCell = 1;
+            markedCellsUsed = 0;
             for (int k = 1; k < B.K; k++) {
                 if (startX - k < 0) break;
                 else if (isUsable(MC, FC, player, startX - k, startY)) {
                     connectedCell++;
-                    if (isFree(MC, startX - k, startY)) markedCellsUsed++;
+                    if (!isFree(MC, startX - k, startY)) markedCellsUsed++;
                 } else break;
             }
             if (connectedCell == B.K) {
                 System.out.println(i.toString() + " verticale con i in basso");
-                for (int k = 1; k < B.K; k++) {
-                    getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX - k, startY);
+                if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                    break;
                 }
             }
 
             //DIAGONALE PRINCIPALE con cella i in alto a sinistra
             connectedCell = 1;
+            markedCellsUsed = 0;
             for (int k = 1; k < B.K; k++) {
                 if (startX + k >= B.M || startY + k >= B.N) break;
                 else if (isUsable(MC, FC, player, startX + k, startY + k)) {
                     connectedCell++;
-                    if (isFree(MC, startX + k, startY + k)) markedCellsUsed++;
+                    if (!isFree(MC, startX + k, startY + k)) markedCellsUsed++;
                 } else break;
             }
             if (connectedCell == B.K) {
                 System.out.println(i.toString() + " diagonale principale con i in alto a sinistra");
-                for (int k = 1; k < B.K; k++) {
-                    getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX + k, startY + k);
+                if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                    break;
                 }
             }
 
             //DIAGONALE PRINCIPALE con cella i in basso a destra
             connectedCell = 1;
+            markedCellsUsed = 0;
             for (int k = 1; k < B.K; k++) {
                 if (startX - k < 0 || startY - k < 0) break;
                 else if (isUsable(MC, FC, player, startX - k, startY - k)) {
                     connectedCell++;
-                    if (isFree(MC, startX - k, startY - k)) markedCellsUsed++;
+                    if (!isFree(MC, startX - k, startY - k)) markedCellsUsed++;
                 } else break;
             }
             if (connectedCell == B.K) {
                 System.out.println(i.toString() + " diagonale principale con i in basso a destra");
-                for (int k = 1; k < B.K; k++) {
-                    getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX - k, startY - k);
+                if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                    break;
                 }
             }
 
             //DIAGONALE SECONDARIA con cella i in alto a destra
             connectedCell = 1;
+            markedCellsUsed = 0;
             for (int k = 1; k < B.K; k++) {
                 if (startX + k >= B.M || startY - k < 0) break;
                 else if (isUsable(MC, FC, player, startX + k, startY - k)) {
                     connectedCell++;
-                    if (isFree(MC, startX + k, startY - k)) markedCellsUsed++;
+                    if (!isFree(MC, startX + k, startY - k)) markedCellsUsed++;
                 } else break;
             }
             if (connectedCell == B.K) {
                 System.out.println(i.toString() + " diagonale secondaria con i in alto a destra");
-                for (int k = 1; k < B.K; k++) {
-                    getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX + k, startY - k);
+                if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                    break;
                 }
             }
 
             //DIAGONALE SECONDARIA con cella i in basso a sinistra
             connectedCell = 1;
+            markedCellsUsed = 0;
             for (int k = 1; k < B.K; k++) {
                 if (startX - k < 0 || startY + k >= B.N) break;
                 else if (isUsable(MC, FC, player, startX - k, startY + k)) {
                     connectedCell++;
-                    if (isFree(MC, startX - k, startY + k)) markedCellsUsed++;
+                    if (!isFree(MC, startX - k, startY + k)) markedCellsUsed++;
                 } else break;
             }
             if (connectedCell == B.K) {
                 System.out.println(i.toString() + " diagonale secondaria con i in basso a sinistra");
-                for (int k = 1; k < B.K; k++) {
-                    getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX - k, startY + k);
+                if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                    break;
                 }
             }
         }
@@ -298,129 +293,137 @@ public class SmartPlayerTest implements MNKPlayer {
 
                 //ORIZZONTALE CON cella i a sinistra
                 connectedCell = 1;
+                markedCellsUsed = 0;
                 for (int k = 1; k < B.K; k++) {
                     if (startY + k >= B.N) break;
                     else if (isUsable(MC, FC, player, startX, startY + k)) {
                         connectedCell++;
-                        if (isFree(MC, startX, startY + k)) markedCellsUsed++;
+                        if (!isFree(MC, startX, startY + k)) markedCellsUsed++;
                     } else break;
                 }
                 if (connectedCell == B.K) {
                     System.out.println(i.toString() + " orizzontale con i a sinistra");
-                    for (int k = 1; k < B.K; k++) {
-                        getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY + k);
+                    if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                        break;
                     }
                 }
 
                 //ORIZZONTALE con cella i a destra
                 connectedCell = 1;
+                markedCellsUsed = 0;
                 for (int k = 1; k < B.K; k++) {
                     if (startY - k < 0) break;
                     else if (isUsable(MC, FC, player, startX, startY - k)) {
                         connectedCell++;
-                        if (isFree(MC, startX, startY - k)) markedCellsUsed++;
+                        if (!isFree(MC, startX, startY - k)) markedCellsUsed++;
                     } else break;
                 }
                 if (connectedCell == B.K) {
                     System.out.println(i.toString() + " orizzontale con i a destra");
-                    for (int k = 1; k < B.K; k++) {
-                        getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY - k);
+                    if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                        break;
                     }
                 }
 
                 //VERTICALE CON cella i in alto
                 connectedCell = 1;
+                markedCellsUsed = 0;
                 for (int k = 1; k < B.K; k++) {
                     if (startX + k >= B.M) break;
                     else if (isUsable(MC, FC, player, startX + k, startY)) {
                         connectedCell++;
-                        if (isFree(MC, startX + k, startY)) markedCellsUsed++;
+                        if (!isFree(MC, startX + k, startY)) markedCellsUsed++;
                     } else break;
                 }
                 if (connectedCell == B.K) {
                     System.out.println(i.toString() + " verticale con i in alto");
-                    for (int k = 1; k < B.K; k++) {
-                        getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX + k, startY);
+                    if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                        break;
                     }
                 }
 
                 //VERTICALE con cella i in basso
                 connectedCell = 1;
+                markedCellsUsed = 0;
                 for (int k = 1; k < B.K; k++) {
                     if (startX - k < 0) break;
                     else if (isUsable(MC, FC, player, startX - k, startY)) {
                         connectedCell++;
-                        if (isFree(MC, startX - k, startY)) markedCellsUsed++;
+                        if (!isFree(MC, startX - k, startY)) markedCellsUsed++;
                     } else break;
                 }
                 if (connectedCell == B.K) {
                     System.out.println(i.toString() + " verticale con i in basso");
-                    for (int k = 1; k < B.K; k++) {
-                        getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX - k, startY);
+                    if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                        break;
                     }
                 }
 
                 //DIAGONALE PRINCIPALE con cella i in alto a sinistra
                 connectedCell = 1;
+                markedCellsUsed = 0;
                 for (int k = 1; k < B.K; k++) {
                     if (startX + k >= B.M || startY + k >= B.N) break;
                     else if (isUsable(MC, FC, player, startX + k, startY + k)) {
                         connectedCell++;
-                        if (isFree(MC, startX + k, startY + k)) markedCellsUsed++;
+                        if (!isFree(MC, startX + k, startY + k)) markedCellsUsed++;
                     } else break;
                 }
                 if (connectedCell == B.K) {
                     System.out.println(i.toString() + " diagonale principale con i in alto a sinistra");
-                    for (int k = 1; k < B.K; k++) {
-                        getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX + k, startY + k);
+                    if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                        break;
                     }
                 }
 
                 //DIAGONALE PRINCIPALE con cella i in basso a destra
                 connectedCell = 1;
+                markedCellsUsed = 0;
                 for (int k = 1; k < B.K; k++) {
                     if (startX - k < 0 || startY - k < 0) break;
                     else if (isUsable(MC, FC, player, startX - k, startY - k)) {
                         connectedCell++;
-                        if (isFree(MC, startX - k, startY - k)) markedCellsUsed++;
+                        if (!isFree(MC, startX - k, startY - k)) markedCellsUsed++;
                     } else break;
                 }
                 if (connectedCell == B.K) {
                     System.out.println(i.toString() + " diagonale principale con i in basso a destra");
-                    for (int k = 1; k < B.K; k++) {
-                        getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX - k, startY - k);
+                    if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                        break;
                     }
                 }
 
                 //DIAGONALE SECONDARIA con cella i in alto a destra
                 connectedCell = 1;
+                markedCellsUsed = 0;
                 for (int k = 1; k < B.K; k++) {
                     if (startX + k >= B.M || startY - k < 0) break;
                     else if (isUsable(MC, FC, player, startX + k, startY - k)) {
                         connectedCell++;
-                        if (isFree(MC, startX + k, startY - k)) markedCellsUsed++;
+                        if (!isFree(MC, startX + k, startY - k)) markedCellsUsed++;
                     } else break;
                 }
                 if (connectedCell == B.K) {
                     System.out.println(i.toString() + " diagonale secondaria con i in alto a destra");
-                    for (int k = 1; k < B.K; k++) {
-                        getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX + k, startY - k);
+                    if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                        break;
                     }
                 }
 
                 //DIAGONALE SECONDARIA con cella i in basso a sinistra
                 connectedCell = 1;
+                markedCellsUsed = 0;
                 for (int k = 1; k < B.K; k++) {
                     if (startX - k < 0 || startY + k >= B.N) break;
                     else if (isUsable(MC, FC, player, startX - k, startY + k)) {
                         connectedCell++;
-                        if (isFree(MC, startX - k, startY + k)) markedCellsUsed++;
+                        if (!isFree(MC, startX - k, startY + k)) markedCellsUsed++;
                     } else break;
                 }
                 if (connectedCell == B.K) {
                     System.out.println(i.toString() + " diagonale secondaria con i in basso a sinistra");
-                    for (int k = 1; k < B.K; k++) {
-                        getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX - k, startY + k);
+                    if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, markedCellsUsed, startX, startY) == winType.PLAYER){
+                        break;
                     }
                 }
 
@@ -428,7 +431,7 @@ public class SmartPlayerTest implements MNKPlayer {
         }
 
         ///////////////
-
+        /*
         System.out.println("\n----------OPPONENT-----------\n");
 
 
@@ -736,6 +739,8 @@ public class SmartPlayerTest implements MNKPlayer {
 
         ///////////////
 
+         */
+
         Pair choosenCell = helpfulnessPQueue.peek();
 
 
@@ -775,7 +780,7 @@ public class SmartPlayerTest implements MNKPlayer {
                     helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, c));
                     return winType.PLAYER;
                 }
-                else if (B.isWinningCell(c.i, c.j) && opponent){ 
+                else if (B.isWinningCell(c.i, c.j) && opponent){
                     markedCellsUsed = markedCellsUsed + 1000;
                     helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, c));
                     return winType.OPPONENT;
@@ -789,26 +794,27 @@ public class SmartPlayerTest implements MNKPlayer {
     }
 
 
-    public MNKCell findCell(MNKCell[] cells, int i, int j) {
-        for (MNKCell c : cells) {
-            if (c.i == i && c.j == j) return c;
+
+    public MNKCell findCell(MNKCell[] cells, int i, int j){
+        for(MNKCell c : cells){
+            if(c.i == i && c.j == j) return c;
         }
         return null;
     }
 
-    public boolean isFree(MNKCell[] FC, int i, int j) {
-        for (MNKCell it : FC) {
-            if (it.i == i && it.j == j) return true;
+    public boolean isFree(MNKCell[] FC, int i, int j){
+        for(MNKCell it : FC){
+            if(it.i == i && it.j == j) return true;
         }
         return false;
     }
 
-    public boolean isUsable(MNKCell[] MC, MNKCell[] FC, MNKCellState player, int i, int j) {
-        for (MNKCell it : FC) {
-            if (it.i == i && it.j == j) return true;
+    public boolean isUsable(MNKCell[] MC, MNKCell[] FC, MNKCellState player, int i, int j){
+        for(MNKCell it : FC){
+            if(it.i == i && it.j == j) return true;
         }
-        for (MNKCell it : MC) {
-            if ((it.i == i && it.j == j) && (it.state == MNKCellState.FREE || it.state == player)) {
+        for(MNKCell it : MC){
+            if((it.i == i && it.j == j) && (it.state == MNKCellState.FREE || it.state == player)){
 //                System.out.println("MC: "+it.toString());
 //                System.out.println("\n\n");
                 return true;
@@ -817,18 +823,7 @@ public class SmartPlayerTest implements MNKPlayer {
         return false;
     }
 
-    public double max(double n, double m) {
-        if (n > m) return n;
-        else return m;
-    }
-
-    public double min(double n, double m) {
-        if (n < m) return n;
-        else return m;
-    }
-
     public String playerName() {
         return "SmartPlayerTest";
     }
 }
-
