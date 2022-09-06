@@ -1,5 +1,7 @@
 package mnkgame;
 
+import com.sun.security.jgss.GSSUtil;
+
 import java.util.*;
 
 enum winType {
@@ -10,24 +12,30 @@ enum winType {
 
 class Pair implements Comparable<Pair> {
     public Integer count;
+    public Integer playerCells;
     public MNKCell cell;
 
     public Pair(){
+        count = null;
+        playerCells = null;
+        cell = null;
     }
 
-    public Pair(Integer count, MNKCell cell) {
+    public Pair(Integer count, Integer playerCells, MNKCell cell) {
         this.count = count;
+        this.playerCells = playerCells;
         this.cell = cell;
     }
+
 
     // Restituisce una voce della mappa (coppia chiave-valore) dai valori specificati
     public static <T, U> Map.Entry<T, U> of(T first, U second) {
         return new AbstractMap.SimpleEntry<>(first, second);
     }
 
-    public int getKey(){
-        return count;
-    }
+//    public int getKey(){
+//        return count;
+//    }
 
     public boolean compareCells(Pair o){
         return o.cell.i == this.cell.i && o.cell.j == this.cell.j;
@@ -108,16 +116,11 @@ public class SmartPlayerTest implements MNKPlayer {
 
         //Fill MaxPriorityQueue
         for(MNKCell i : FC){
-            smartPlayerPQueue.add(new Pair(-1000, i));
+            smartPlayerPQueue.add(new Pair(0, 0, i));
         }
 
         MNKCellState smartPlayerTurn = first ? MNKCellState.P1 : MNKCellState.P2;
         MNKCellState oppositePlayerTurn = first ? MNKCellState.P2 : MNKCellState.P1;
-
-        //IMPORTANTE!!!
-        //Utilizzato una "euristica casalinga" che somma anche le markeCells utilizzate, questo aumenta la probabilità che
-        //l'algoritmo scelga una cella più vicina alla vincita rispetto ad altre, DA MIGLIORARE, cercando un moltiplicatore
-        //variabile da moltiplicare alle markedCellsUsed, modificare i valori studiando meglio le varie situazioni.
 
         c = calculateHelpfulness(MC, FC, smartPlayerTurn, oppositePlayerTurn);
 
@@ -127,20 +130,13 @@ public class SmartPlayerTest implements MNKPlayer {
     }
 
     public MNKCell calculateHelpfulness(MNKCell[] MC, MNKCell[] FC, MNKCellState player, MNKCellState opponent) {
-        //Test printing real-time FC
-//        for(MNKCell i : FC){
-//            System.out.print(i.toString()+" ");
-//        }
-//        System.out.println("\n\n");
-
-
         //Dichiarazione MaxPriorityQueue
         PriorityQueue<Pair> helpfulnessPQueue =
                 new PriorityQueue<Pair>(Collections.reverseOrder());
 
         //Fill MaxPriorityQueue
         for (MNKCell i : FC) {
-            helpfulnessPQueue.add(new Pair(0, i));
+            helpfulnessPQueue.add(new Pair(0, 0, i));
         }
 
         boolean playerVictory = false;
@@ -237,10 +233,12 @@ public class SmartPlayerTest implements MNKPlayer {
         }
 
         // CONTROLLO MARKED CELL PLAYER
-        
+
         for (MNKCell i : MC) {
             int startX = i.i;
             int startY = i.j;
+
+            if(playerVictory) break;
 
             //ORIZZONTALE CON cella i a sinistra
             connectedCell = 0;
@@ -314,12 +312,14 @@ public class SmartPlayerTest implements MNKPlayer {
         //-------------------------------------OPPONENT
 
         //Calculating Helpfulness updating the MaxPriorityQueue considering K rows with Free Cells at the start and or the end of the row
-        
+
         connectedCell = 1;
         markedCellsUsed = 0;
         for (MNKCell i : FC) {
             int startX = i.i;
             int startY = i.j;
+
+            if(playerVictory) break;
 
             //ORIZZONTALE CON cella i a sinistra
             connectedCell = 1;
@@ -339,7 +339,6 @@ public class SmartPlayerTest implements MNKPlayer {
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX, startY+j);
                 }
             }
-            System.out.println("MarkedCell: "+markedCellsUsed+"\n");
 
             //VERTICALE CON cella i in alto
             connectedCell = 1;
@@ -360,7 +359,6 @@ public class SmartPlayerTest implements MNKPlayer {
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX+j, startY);
                 }
             }
-            System.out.println("MarkedCell: "+markedCellsUsed+"\n");
 
             //DIAGONALE PRINCIPALE con cella i in alto a sinistra
             connectedCell = 1;
@@ -381,7 +379,6 @@ public class SmartPlayerTest implements MNKPlayer {
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX+j, startY+j);
                 }
             }
-            System.out.println("MarkedCell: "+markedCellsUsed+"\n");
 
             //DIAGONALE SECONDARIA con cella i in alto a destra
             connectedCell = 1;
@@ -402,7 +399,6 @@ public class SmartPlayerTest implements MNKPlayer {
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX+j, startY-j);
                 }
             }
-            System.out.println("MarkedCell: "+markedCellsUsed+"\n");
         }
 
         // CONTROLLO MARKED CELL OPPONENT
@@ -411,6 +407,8 @@ public class SmartPlayerTest implements MNKPlayer {
             int startX = i.i;
             int startY = i.j;
 
+            if(playerVictory) break;
+
             //ORIZZONTALE CON cella i a sinistra
             connectedCell = 0;
             markedCellsUsed = 0;
@@ -423,9 +421,6 @@ public class SmartPlayerTest implements MNKPlayer {
             }
             if (connectedCell == B.K) {
                 System.out.println(i.toString() + " orizzontale con i a sinistra");
-                if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX, startY) == winType.OPPONENT){
-                    break;
-                }
                 for(int j = 1; j < B.K; j++){
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX, startY+j);
                 }
@@ -443,9 +438,6 @@ public class SmartPlayerTest implements MNKPlayer {
             }
             if (connectedCell == B.K) {
                 System.out.println(i.toString() + " verticale con i in alto");
-                if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX, startY) == winType.OPPONENT){
-                    break;
-                }
                 for(int j = 1; j < B.K; j++){
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX+j, startY);
                 }
@@ -463,9 +455,6 @@ public class SmartPlayerTest implements MNKPlayer {
             }
             if (connectedCell == B.K) {
                 System.out.println(i.toString() + " diagonale principale con i in alto a sinistra");
-                if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX, startY) == winType.OPPONENT){
-                    break;
-                }
                 for(int j = 1; j < B.K; j++){
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX+j, startY+j);
                 }
@@ -483,23 +472,30 @@ public class SmartPlayerTest implements MNKPlayer {
             }
             if (connectedCell == B.K) {
                 System.out.println(i.toString() + " diagonale secondaria con i in alto a destra");
-                if (getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX, startY) == winType.OPPONENT){
-                    break;
-                }
                 for(int j = 1; j < B.K; j++){
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX+j, startY-j);
                 }
             }
         }
 
-        
-        Pair choosenCell = helpfulnessPQueue.peek();
+        PriorityQueue<Pair> smartPlayerPQueue = new PriorityQueue<>(helpfulnessPQueue);
 
-        System.out.println("\n" + choosenCell.cell.toString() + " count:" + choosenCell.count + "\n");
+        Pair choosenCell = helpfulnessPQueue.poll();
+        Pair otherCell = helpfulnessPQueue.poll();
+
+        //SI INTERROMPE QUI ALLA SECONDA PARTITA NEL 3x3
+        while(choosenCell.count == otherCell.count){
+            System.out.println(choosenCell.cell+ " " + otherCell.cell);
+            if(choosenCell.playerCells < otherCell.playerCells) choosenCell = otherCell;
+            otherCell = helpfulnessPQueue.poll();
+            if(otherCell == null) break;
+        }
+
+        System.out.println("\n" + choosenCell.cell.toString() + " count:" + choosenCell.count + " playerCell:" + choosenCell.playerCells +"\n");
 
         //Print the MaxPriorityQueue to test the algorithm
         for (MNKCell i : FC) {
-            System.out.println(helpfulnessPQueue.peek().cell.toString() + " " + helpfulnessPQueue.poll().count);
+            System.out.println(smartPlayerPQueue.peek().cell.toString() + " " + smartPlayerPQueue.peek().count + " " + smartPlayerPQueue.poll().playerCells);
         }
 
         System.out.println("\n----------------------------------------------\n");
@@ -512,22 +508,23 @@ public class SmartPlayerTest implements MNKPlayer {
         if (c != null) {
             Object[] toUpdate = helpfulnessPQueue.toArray();
             boolean found = false;
-            int it = 0, originalCount = 0;
+            int it = 0, originalCount = 0, originalPlayerCells = 0;
             while (!found) {
                 Pair tmp = (Pair) toUpdate[it];
                 if (tmp.cell.equals(c)) {
                     originalCount = tmp.count;
+                    originalPlayerCells = tmp.playerCells;
                     found = true;
                 }
                 it++;
             }
-            helpfulnessPQueue.removeIf(p -> p.compareCells(new Pair(0, c)));
+            helpfulnessPQueue.removeIf(p -> p.compareCells(new Pair(0, 0, c)));
             if (B.gameState == MNKGameState.OPEN) {
                 if (!opponent){
                     B.markCell(c.i, c.j);
                     if(isWinningCell(c.i, c.j, toCheck)) {
                         markedCellsUsed = markedCellsUsed + 10000;
-                        helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, c));
+                        helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, c));
                         B.unmarkCell();
                         return winType.PLAYER;
                     }else B.unmarkCell();
@@ -536,13 +533,14 @@ public class SmartPlayerTest implements MNKPlayer {
                     B.markCell(c.i, c.j);
                     if (isWinningCell(c.i, c.j, toCheck)) {
                         markedCellsUsed = markedCellsUsed + 1000;
-                        helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, c));
+                        helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, c));
                         B.unmarkCell();
                         return winType.OPPONENT;
                     }else B.unmarkCell();
                 }
             }
-            helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, c));
+            if(!opponent) helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells+markedCellsUsed, c));
+            else helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, c));
         }
         return winType.NONE;
     }
@@ -558,14 +556,12 @@ public class SmartPlayerTest implements MNKPlayer {
         n = 1;
         for(int k = 1; j-k >= 0 && B.cellState(i, j-k) == s; k++) n++; // backward check
         for(int k = 1; j+k <  B.N && B.cellState(i,j+k) == s; k++) n++; // forward check
-        System.out.println("n: "+n);
         if(n >= B.K) return true;
 
         // Vertical check
         n = 1;
         for(int k = 1; i-k >= 0 && B.cellState(i-k,j) == s; k++) n++; // backward check
         for(int k = 1; i+k <  B.M && B.cellState(i+k,j) == s; k++) n++; // forward check
-        System.out.println("n: "+n);
         if(n >= B.K) return true;
 
 
@@ -573,14 +569,12 @@ public class SmartPlayerTest implements MNKPlayer {
         n = 1;
         for(int k = 1; i-k >= 0 && j-k >= 0 && B.cellState(i-k,j-k) == s; k++) n++; // backward check
         for(int k = 1; i+k <  B.M && j+k <  B.N && B.cellState(i+k,j+k) == s; k++) n++; // forward check
-        System.out.println("n: "+n);
         if(n >= B.K) return true;
 
         // Anti-diagonal check
         n = 1;
         for(int k = 1; i-k >= 0 && j+k < B.N  && B.cellState(i-k,j+k) == s; k++) n++; // backward check
         for(int k = 1; i+k <  B.M && j-k >= 0 && B.cellState(i+k, j-k) == s; k++) n++; // backward check
-        System.out.println("n: "+n);
         if(n >= B.K) return true;
 
         return false;
@@ -606,8 +600,6 @@ public class SmartPlayerTest implements MNKPlayer {
         }
         for(MNKCell it : MC){
             if((it.i == i && it.j == j) && (it.state == MNKCellState.FREE || it.state == player)){
-//                System.out.println("MC: "+it.toString());
-//                System.out.println("\n\n");
                 return true;
             }
         }
