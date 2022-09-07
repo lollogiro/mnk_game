@@ -539,8 +539,15 @@ public class SmartPlayerTest implements MNKPlayer {
                     }else B.unmarkCell();
                 }
             }
-            if(!opponent) helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells+markedCellsUsed, c));
-            else helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, c));
+            if(!opponent){
+                if(markedCellsUsed >= B.K-2) helpfulnessPQueue.add(new Pair(originalCount + 6 + markedCellsUsed, originalPlayerCells + markedCellsUsed, c));
+                else helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells+markedCellsUsed, c));
+            }
+            else{
+                if(markedCellsUsed >= B.K-2) helpfulnessPQueue.add(new Pair(originalCount + 6 + markedCellsUsed, originalPlayerCells, c));
+                else helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, c));
+            } 
+            
         }
         return winType.NONE;
     }
