@@ -1,7 +1,5 @@
 package mnkgame;
 
-import com.sun.security.jgss.GSSUtil;
-
 import java.util.*;
 
 enum winType {
@@ -27,15 +25,12 @@ class Pair implements Comparable<Pair> {
         this.cell = cell;
     }
 
-
-    // Restituisce una voce della mappa (coppia chiave-valore) dai valori specificati
+    /*
+     * Restituisce una voce della mappa (coppia chiave-valore) dai valori specificati
+     */
     public static <T, U> Map.Entry<T, U> of(T first, U second) {
         return new AbstractMap.SimpleEntry<>(first, second);
     }
-
-//    public int getKey(){
-//        return count;
-//    }
 
     public boolean compareCells(Pair o){
         return o.cell.i == this.cell.i && o.cell.j == this.cell.j;
@@ -97,39 +92,17 @@ public class SmartPlayerTest implements MNKPlayer {
             return c;
         }
 
-        //Se si parte secondo, FORSE è possibile fare K-1 mosse random senza perdere, questo potrebbe ovviare a problemi
-        //di velocità dell'alagoritmo con tabelle di grandi dimensioni
-
-        //Su grandi dimensioni, da 8x8 l'algoritmo è un pò lento, ma soprattutto non vince mai, una soluzione potrebbe
-        //essere quella di eseguire l'algoritmo su 4 parti della tabella indipendentemente, questo finché il numero di
-        //celle da valutare non si abbassa fino ad un certo lower bound, es. fino a 25 celle libere!!!, prima eseguendo
-        //l'algoritmo sulla porzione in alto a destra, in alto a sinistra, in basso a destra, in basso a sinistra
-        //indipendentemente. Magari funziona meglio e riesce a fare della giocate migliori.
-
-        //Fatto per sicurezza
-        FC = B.getFreeCells();
-        MC = B.getMarkedCells();
-
-        //Declaration and implementation MaxPriorityQueue
-        PriorityQueue<Pair> smartPlayerPQueue =
-                new PriorityQueue<Pair>(Collections.reverseOrder());
-
-        //Fill MaxPriorityQueue
-        for(MNKCell i : FC){
-            smartPlayerPQueue.add(new Pair(0, 0, i));
-        }
-
         MNKCellState smartPlayerTurn = first ? MNKCellState.P1 : MNKCellState.P2;
         MNKCellState oppositePlayerTurn = first ? MNKCellState.P2 : MNKCellState.P1;
 
-        c = calculateHelpfulness(MC, FC, smartPlayerTurn, oppositePlayerTurn);
-
+        c = calculateHelpfulness(MC, FC, smartPlayerTurn, oppositePlayerTurn, start);
 
         B.markCell(c.i, c.j);
+
         return c;
     }
 
-    public MNKCell calculateHelpfulness(MNKCell[] MC, MNKCell[] FC, MNKCellState player, MNKCellState opponent) {
+    public MNKCell calculateHelpfulness(MNKCell[] MC, MNKCell[] FC, MNKCellState player, MNKCellState opponent, long start) {
         //Dichiarazione MaxPriorityQueue
         PriorityQueue<Pair> helpfulnessPQueue =
                 new PriorityQueue<Pair>(Collections.reverseOrder());
@@ -140,12 +113,18 @@ public class SmartPlayerTest implements MNKPlayer {
         }
 
         boolean playerVictory = false;
+        boolean outOfTime = false;
 
         //Calculating Helpfulness updating the MaxPriorityQueue considering K rows with Free Cells at the start and or the end of the row
         int connectedCell = 1, markedCellsUsed = 0;
         for (MNKCell i : FC) {
             int startX = i.i;
             int startY = i.j;
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
+            }
 
             //ORIZZONTALE CON cella i a sinistra
             connectedCell = 1;
@@ -166,6 +145,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 for(int j = 1; j < B.K; j++){
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, player, markedCellsUsed, startX, startY+j);
                 }
+            }
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
             }
 
             //VERTICALE CON cella i in alto
@@ -189,6 +173,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 }
             }
 
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
             //DIAGONALE PRINCIPALE con cella i in alto a sinistra
             connectedCell = 1;
             markedCellsUsed = 0;
@@ -208,6 +197,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 for(int j = 1; j < B.K; j++){
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, player, markedCellsUsed, startX+j, startY+j);
                 }
+            }
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
             }
 
             //DIAGONALE SECONDARIA con cella i in alto a destra
@@ -238,7 +232,12 @@ public class SmartPlayerTest implements MNKPlayer {
             int startX = i.i;
             int startY = i.j;
 
-            if(playerVictory) break;
+            if(playerVictory || outOfTime) break;
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
+            }
 
             //ORIZZONTALE CON cella i a sinistra
             connectedCell = 0;
@@ -255,6 +254,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 for(int j = 1; j < B.K; j++){
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, player, markedCellsUsed, startX, startY+j);
                 }
+            }
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
             }
 
             //VERTICALE CON cella i in alto
@@ -274,6 +278,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 }
             }
 
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
             //DIAGONALE PRINCIPALE con cella i in alto a sinistra
             connectedCell = 0;
             markedCellsUsed = 0;
@@ -289,6 +298,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 for(int j = 1; j < B.K; j++){
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, player, markedCellsUsed, startX+j, startY+j);
                 }
+            }
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
             }
 
             //DIAGONALE SECONDARIA con cella i in alto a destra
@@ -307,6 +321,11 @@ public class SmartPlayerTest implements MNKPlayer {
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, player, markedCellsUsed, startX+j, startY-j);
                 }
             }
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
+            }
         }
 
         //-------------------------------------OPPONENT
@@ -319,7 +338,12 @@ public class SmartPlayerTest implements MNKPlayer {
             int startX = i.i;
             int startY = i.j;
 
-            if(playerVictory) break;
+            if(playerVictory || outOfTime) break;
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
+            }
 
             //ORIZZONTALE CON cella i a sinistra
             connectedCell = 1;
@@ -338,6 +362,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 for(int j = 1; j < B.K; j++){
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX, startY+j);
                 }
+            }
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
             }
 
             //VERTICALE CON cella i in alto
@@ -360,6 +389,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 }
             }
 
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
             //DIAGONALE PRINCIPALE con cella i in alto a sinistra
             connectedCell = 1;
             markedCellsUsed = 0;
@@ -380,6 +414,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 }
             }
 
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
             //DIAGONALE SECONDARIA con cella i in alto a destra
             connectedCell = 1;
             markedCellsUsed = 0;
@@ -398,6 +437,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 for(int j = 1; j < B.K; j++){
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX+j, startY-j);
                 }
+            }
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
             }
         }
 
@@ -407,7 +451,12 @@ public class SmartPlayerTest implements MNKPlayer {
             int startX = i.i;
             int startY = i.j;
 
-            if(playerVictory) break;
+            if(playerVictory || outOfTime) break;
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
+            }
 
             //ORIZZONTALE CON cella i a sinistra
             connectedCell = 0;
@@ -424,6 +473,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 for(int j = 1; j < B.K; j++){
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX, startY+j);
                 }
+            }
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
             }
 
             //VERTICALE CON cella i in alto
@@ -443,6 +497,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 }
             }
 
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
             //DIAGONALE PRINCIPALE con cella i in alto a sinistra
             connectedCell = 0;
             markedCellsUsed = 0;
@@ -460,6 +519,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 }
             }
 
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
             //DIAGONALE SECONDARIA con cella i in alto a destra
             connectedCell = 0;
             markedCellsUsed = 0;
@@ -475,6 +539,11 @@ public class SmartPlayerTest implements MNKPlayer {
                 for(int j = 1; j < B.K; j++){
                     getFreeCellsHelpfulness(FC, helpfulnessPQueue, true, opponent, markedCellsUsed, startX+j, startY-j);
                 }
+            }
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+                outOfTime = true;
+                break;
             }
         }
 
@@ -546,8 +615,8 @@ public class SmartPlayerTest implements MNKPlayer {
             else{
                 if(markedCellsUsed >= B.K-2) helpfulnessPQueue.add(new Pair(originalCount + 6 + markedCellsUsed, originalPlayerCells, c));
                 else helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, c));
-            } 
-            
+            }
+
         }
         return winType.NONE;
     }
@@ -570,7 +639,6 @@ public class SmartPlayerTest implements MNKPlayer {
         for(int k = 1; i-k >= 0 && B.cellState(i-k,j) == s; k++) n++; // backward check
         for(int k = 1; i+k <  B.M && B.cellState(i+k,j) == s; k++) n++; // forward check
         if(n >= B.K) return true;
-
 
         // Diagonal check
         n = 1;
