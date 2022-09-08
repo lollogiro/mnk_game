@@ -115,10 +115,98 @@ public class SmartPlayerTest implements MNKPlayer {
         boolean playerVictory = false;
         boolean outOfTime = false;
 
-        //-->PLAYER<--
+        //-->MARKED CELL PLAYER<--
+
+        for (MNKCell i : MC) {
+
+            if(playerVictory || outOfTime) break;
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
+            //ORIZZONTALE CON cella i a sinistra
+            horizontalCheck(MC, FC, helpfulnessPQueue, player, i, true);
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
+            //VERTICALE CON cella i in alto
+            verticalCheck(MC, FC, helpfulnessPQueue, player, i, true);
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
+            //DIAGONALE PRINCIPALE con cella i in alto a sinistra
+            mainDiagonalCheck(MC, FC, helpfulnessPQueue, player, i, true);
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
+            //DIAGONALE SECONDARIA con cella i in alto a destra
+            secondDiagonalCheck(MC, FC, helpfulnessPQueue, player, i, true);
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+        }
+
+        //-->MARKED CELL OPPONENT<--
+
+        for (MNKCell i : MC) {
+
+            if(playerVictory || outOfTime) break;
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
+            //ORIZZONTALE CON cella i a sinistra
+            horizontalCheck(MC, FC, helpfulnessPQueue, opponent, i, true);
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
+            //VERTICALE CON cella i in alto
+            verticalCheck(MC, FC, helpfulnessPQueue, opponent, i, true);
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
+            //DIAGONALE PRINCIPALE con cella i in alto a sinistra
+            mainDiagonalCheck(MC, FC, helpfulnessPQueue, opponent, i, true);
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+
+            //DIAGONALE SECONDARIA con cella i in alto a destra
+            secondDiagonalCheck(MC, FC, helpfulnessPQueue, opponent, i, true);
+
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
+                outOfTime = true;
+                break;
+            }
+        }
+
+        //-->FREE CELL PLAYER<--
         for (MNKCell i : FC) {
 
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
                 break;
             }
@@ -131,7 +219,7 @@ public class SmartPlayerTest implements MNKPlayer {
                 break;
             }
 
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
                 break;
             }
@@ -145,7 +233,7 @@ public class SmartPlayerTest implements MNKPlayer {
                 break;
             }
 
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
                 break;
             }
@@ -159,7 +247,7 @@ public class SmartPlayerTest implements MNKPlayer {
                 break;
             }
 
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
                 break;
             }
@@ -172,55 +260,13 @@ public class SmartPlayerTest implements MNKPlayer {
                 break;
             }
 
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
                 break;
             }
         }
 
-        //-->MARKED CELL PLAYER<--
-
-        for (MNKCell i : MC) {
-
-            if(playerVictory || outOfTime) break;
-
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
-                outOfTime = true;
-                break;
-            }
-
-            //ORIZZONTALE CON cella i a sinistra
-            horizontalCheck(MC, FC, helpfulnessPQueue, player, i, true);
-
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
-                outOfTime = true;
-                break;
-            }
-
-            //VERTICALE CON cella i in alto
-            verticalCheck(MC, FC, helpfulnessPQueue, player, i, true);
-
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
-                outOfTime = true;
-                break;
-            }
-
-            //DIAGONALE PRINCIPALE con cella i in alto a sinistra
-            mainDiagonalCheck(MC, FC, helpfulnessPQueue, player, i, true);
-
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
-                outOfTime = true;
-                break;
-            }
-
-            //DIAGONALE SECONDARIA con cella i in alto a destra
-            secondDiagonalCheck(MC, FC, helpfulnessPQueue, player, i, true);
-
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
-                outOfTime = true;
-                break;
-            }
-        }
+        
 
         //-->OPPONENT<--
 
@@ -228,7 +274,7 @@ public class SmartPlayerTest implements MNKPlayer {
 
             if(playerVictory || outOfTime) break;
 
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
                 break;
             }
@@ -236,7 +282,7 @@ public class SmartPlayerTest implements MNKPlayer {
             //ORIZZONTALE CON cella i a sinistra
             horizontalCheck(MC, FC, helpfulnessPQueue, opponent, i, false);
 
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
                 break;
             }
@@ -244,7 +290,7 @@ public class SmartPlayerTest implements MNKPlayer {
             //VERTICALE CON cella i in alto
             verticalCheck(MC, FC, helpfulnessPQueue, opponent, i, false);
 
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
                 break;
             }
@@ -252,7 +298,7 @@ public class SmartPlayerTest implements MNKPlayer {
             //DIAGONALE PRINCIPALE con cella i in alto a sinistra
             mainDiagonalCheck(MC, FC, helpfulnessPQueue, opponent, i, false);
 
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
                 break;
             }
@@ -260,51 +306,7 @@ public class SmartPlayerTest implements MNKPlayer {
             //DIAGONALE SECONDARIA con cella i in alto a destra
             secondDiagonalCheck(MC, FC, helpfulnessPQueue, opponent, i, false);
 
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
-                outOfTime = true;
-                break;
-            }
-        }
-
-        //-->MARKED CELL OPPONENT<--
-
-        for (MNKCell i : MC) {
-
-            if(playerVictory || outOfTime) break;
-
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
-                outOfTime = true;
-                break;
-            }
-
-            //ORIZZONTALE CON cella i a sinistra
-            horizontalCheck(MC, FC, helpfulnessPQueue, opponent, i, true);
-
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
-                outOfTime = true;
-                break;
-            }
-
-            //VERTICALE CON cella i in alto
-            verticalCheck(MC, FC, helpfulnessPQueue, opponent, i, true);
-
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
-                outOfTime = true;
-                break;
-            }
-
-            //DIAGONALE PRINCIPALE con cella i in alto a sinistra
-            mainDiagonalCheck(MC, FC, helpfulnessPQueue, opponent, i, true);
-
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
-                outOfTime = true;
-                break;
-            }
-
-            //DIAGONALE SECONDARIA con cella i in alto a destra
-            secondDiagonalCheck(MC, FC, helpfulnessPQueue, opponent, i, true);
-
-            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)){
+            if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
                 break;
             }
