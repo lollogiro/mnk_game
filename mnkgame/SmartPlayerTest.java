@@ -333,7 +333,9 @@ public class SmartPlayerTest implements MNKPlayer {
 
         while(choosenCell.count == otherCell.count){
             System.out.println(choosenCell.cell+ " " + otherCell.cell);
-            if(choosenCell.playerCells <= otherCell.opponentCells) choosenCell = otherCell;
+            if(otherCell.playerCells == 0 && otherCell.opponentCells - otherCell.playerCells >= B.K-2) choosenCell = otherCell;
+            else if(otherCell.opponentCells == 0 && otherCell.playerCells - otherCell.opponentCells >= B.K-2) choosenCell = otherCell;
+            else if(choosenCell.opponentCells < otherCell.opponentCells) choosenCell = otherCell;
             otherCell = smartPlayerPQueueTwo.poll();
             if(otherCell == null) break;
         }
@@ -476,12 +478,13 @@ public class SmartPlayerTest implements MNKPlayer {
                     }else B.unmarkCell();
                 }
             }
+            //se scommentate parti sottostanti: vince 7 6 4 ma perde 10 10 5, se commentate vince 10 10 5 ma perde 7 6 4
             if(!opponent){
-                if(markedCellsUsed >= B.K-2) helpfulnessPQueue.add(new Pair(originalCount + 10 + markedCellsUsed, originalPlayerCells + markedCellsUsed, originalOpponentCells, c));
+                if(/*originalPlayerCells+*/markedCellsUsed >= B.K-2) helpfulnessPQueue.add(new Pair(originalCount + 10 + markedCellsUsed, originalPlayerCells + markedCellsUsed, originalOpponentCells, c));
                 else helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells+markedCellsUsed, originalOpponentCells, c));
             }
             else{
-                if(markedCellsUsed >= B.K-2) helpfulnessPQueue.add(new Pair(originalCount + 10 + markedCellsUsed, originalPlayerCells, originalOpponentCells + markedCellsUsed, c));
+                if(/*originalOpponentCells+*/markedCellsUsed >= B.K-2) helpfulnessPQueue.add(new Pair(originalCount + 10 + markedCellsUsed, originalPlayerCells, originalOpponentCells + markedCellsUsed, c));
                 else helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, originalOpponentCells + markedCellsUsed, c));
             }
 
