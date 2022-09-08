@@ -11,17 +11,21 @@ enum winType {
 class Pair implements Comparable<Pair> {
     public Integer count;
     public Integer playerCells;
+    public Integer opponentCells;
     public MNKCell cell;
+
 
     public Pair(){
         count = null;
         playerCells = null;
+        opponentCells = null;
         cell = null;
     }
 
-    public Pair(Integer count, Integer playerCells, MNKCell cell) {
+    public Pair(Integer count, Integer playerCells, Integer opponentCells, MNKCell cell) {
         this.count = count;
         this.playerCells = playerCells;
+        this.opponentCells = opponentCells;
         this.cell = cell;
     }
 
@@ -109,7 +113,7 @@ public class SmartPlayerTest implements MNKPlayer {
 
         //Fill MaxPriorityQueue
         for (MNKCell i : FC) {
-            helpfulnessPQueue.add(new Pair(0, 0, i));
+            helpfulnessPQueue.add(new Pair(0, 0, 0, i));
         }
 
         boolean playerVictory = false;
@@ -127,7 +131,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //ORIZZONTALE CON cella i a sinistra
-            horizontalCheck(MC, FC, helpfulnessPQueue, player, i, true);
+            horizontalCheck(MC, FC, helpfulnessPQueue, false, player, i, true);
 
             if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
@@ -135,7 +139,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //VERTICALE CON cella i in alto
-            verticalCheck(MC, FC, helpfulnessPQueue, player, i, true);
+            verticalCheck(MC, FC, helpfulnessPQueue, false, player, i, true);
 
             if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
@@ -143,7 +147,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //DIAGONALE PRINCIPALE con cella i in alto a sinistra
-            mainDiagonalCheck(MC, FC, helpfulnessPQueue, player, i, true);
+            mainDiagonalCheck(MC, FC, helpfulnessPQueue, false, player, i, true);
 
             if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
@@ -151,7 +155,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //DIAGONALE SECONDARIA con cella i in alto a destra
-            secondDiagonalCheck(MC, FC, helpfulnessPQueue, player, i, true);
+            secondDiagonalCheck(MC, FC, helpfulnessPQueue, false, player, i, true);
 
             if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
@@ -171,7 +175,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //ORIZZONTALE CON cella i a sinistra
-            horizontalCheck(MC, FC, helpfulnessPQueue, opponent, i, true);
+            horizontalCheck(MC, FC, helpfulnessPQueue, true, opponent, i, true);
 
             if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
@@ -179,7 +183,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //VERTICALE CON cella i in alto
-            verticalCheck(MC, FC, helpfulnessPQueue, opponent, i, true);
+            verticalCheck(MC, FC, helpfulnessPQueue, true, opponent, i, true);
 
             if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
@@ -187,7 +191,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //DIAGONALE PRINCIPALE con cella i in alto a sinistra
-            mainDiagonalCheck(MC, FC, helpfulnessPQueue, opponent, i, true);
+            mainDiagonalCheck(MC, FC, helpfulnessPQueue, true, opponent, i, true);
 
             if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
@@ -195,7 +199,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //DIAGONALE SECONDARIA con cella i in alto a destra
-            secondDiagonalCheck(MC, FC, helpfulnessPQueue, opponent, i, true);
+            secondDiagonalCheck(MC, FC, helpfulnessPQueue, true, opponent, i, true);
 
             if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
@@ -212,7 +216,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //ORIZZONTALE CON cella i a sinistra
-            horizontalCheck(MC, FC, helpfulnessPQueue, player, i, false);
+            horizontalCheck(MC, FC, helpfulnessPQueue, false, player, i, false);
 
             if(helpfulnessPQueue.peek().count >= 10000){
                 playerVictory = true;
@@ -225,7 +229,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //VERTICALE CON cella i in alto
-            verticalCheck(MC, FC, helpfulnessPQueue, player, i, false);
+            verticalCheck(MC, FC, helpfulnessPQueue, false, player, i, false);
 
 
             if(helpfulnessPQueue.peek().count >= 10000){
@@ -239,7 +243,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //DIAGONALE PRINCIPALE con cella i in alto a sinistra
-            mainDiagonalCheck(MC, FC, helpfulnessPQueue, player, i, false);
+            mainDiagonalCheck(MC, FC, helpfulnessPQueue, false, player, i, false);
 
 
             if(helpfulnessPQueue.peek().count >= 10000){
@@ -253,7 +257,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //DIAGONALE SECONDARIA con cella i in alto a destra
-            secondDiagonalCheck(MC, FC, helpfulnessPQueue, player, i, false);
+            secondDiagonalCheck(MC, FC, helpfulnessPQueue, false, player, i, false);
 
             if(helpfulnessPQueue.peek().count >= 10000){
                 playerVictory = true;
@@ -280,7 +284,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //ORIZZONTALE CON cella i a sinistra
-            horizontalCheck(MC, FC, helpfulnessPQueue, opponent, i, false);
+            horizontalCheck(MC, FC, helpfulnessPQueue, true, opponent, i, false);
 
             if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
@@ -288,7 +292,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //VERTICALE CON cella i in alto
-            verticalCheck(MC, FC, helpfulnessPQueue, opponent, i, false);
+            verticalCheck(MC, FC, helpfulnessPQueue, true, opponent, i, false);
 
             if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
@@ -296,7 +300,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //DIAGONALE PRINCIPALE con cella i in alto a sinistra
-            mainDiagonalCheck(MC, FC, helpfulnessPQueue, opponent, i, false);
+            mainDiagonalCheck(MC, FC, helpfulnessPQueue, true, opponent, i, false);
 
             if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
@@ -304,7 +308,7 @@ public class SmartPlayerTest implements MNKPlayer {
             }
 
             //DIAGONALE SECONDARIA con cella i in alto a destra
-            secondDiagonalCheck(MC, FC, helpfulnessPQueue, opponent, i, false);
+            secondDiagonalCheck(MC, FC, helpfulnessPQueue, true, opponent, i, false);
 
             if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(80.0/100.0)){
                 outOfTime = true;
@@ -313,22 +317,33 @@ public class SmartPlayerTest implements MNKPlayer {
         }
 
         PriorityQueue<Pair> smartPlayerPQueue = new PriorityQueue<>(helpfulnessPQueue);
+        PriorityQueue<Pair> smartPlayerPQueueTwo = new PriorityQueue<>(helpfulnessPQueue);
 
         Pair choosenCell = helpfulnessPQueue.poll();
         Pair otherCell = helpfulnessPQueue.poll();
 
         while(choosenCell.count == otherCell.count){
             System.out.println(choosenCell.cell+ " " + otherCell.cell);
-            if(choosenCell.playerCells < otherCell.playerCells) choosenCell = otherCell;
+            if(choosenCell.playerCells < otherCell.playerCells)choosenCell = otherCell;
             otherCell = helpfulnessPQueue.poll();
             if(otherCell == null) break;
         }
+
+        otherCell = smartPlayerPQueueTwo.poll();
+
+        while(choosenCell.count == otherCell.count){
+            System.out.println(choosenCell.cell+ " " + otherCell.cell);
+            if(choosenCell.playerCells <= otherCell.opponentCells) choosenCell = otherCell;
+            otherCell = smartPlayerPQueueTwo.poll();
+            if(otherCell == null) break;
+        }
+        
 
         System.out.println("\n" + choosenCell.cell.toString() + " count:" + choosenCell.count + " playerCell:" + choosenCell.playerCells +"\n");
 
         //Print the MaxPriorityQueue to test the algorithm
         for (MNKCell i : FC) {
-            System.out.println(smartPlayerPQueue.peek().cell.toString() + " " + smartPlayerPQueue.peek().count + " " + smartPlayerPQueue.poll().playerCells);
+            System.out.println(smartPlayerPQueue.peek().cell.toString() + " " + smartPlayerPQueue.peek().count + " " + smartPlayerPQueue.peek().playerCells + " " + smartPlayerPQueue.poll().opponentCells);
         }
 
         System.out.println("\n----------------------------------------------\n");
@@ -336,7 +351,7 @@ public class SmartPlayerTest implements MNKPlayer {
         return choosenCell.cell;
     }
 
-    public void horizontalCheck(MNKCell[] MC, MNKCell[] FC, PriorityQueue<Pair> helpfulnessPQueue, MNKCellState turnState, MNKCell cell, boolean MCCheck){
+    public void horizontalCheck(MNKCell[] MC, MNKCell[] FC, PriorityQueue<Pair> helpfulnessPQueue, boolean opponent, MNKCellState turnState, MNKCell cell, boolean MCCheck){
         int connectedCell = 1;
         int markedCellsUsed = 0;
         if(MCCheck) markedCellsUsed++;
@@ -353,12 +368,12 @@ public class SmartPlayerTest implements MNKPlayer {
             if(MCCheck) j = 1;
             else j = 0;
             for(; j < B.K; j++){
-                getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, turnState, markedCellsUsed, cell.i, cell.j+j);
+                getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i, cell.j+j);
             }
         }
     }
 
-    public void verticalCheck(MNKCell[] MC, MNKCell[] FC, PriorityQueue<Pair> helpfulnessPQueue, MNKCellState turnState, MNKCell cell, boolean MCCheck){
+    public void verticalCheck(MNKCell[] MC, MNKCell[] FC, PriorityQueue<Pair> helpfulnessPQueue, boolean opponent, MNKCellState turnState, MNKCell cell, boolean MCCheck){
         int connectedCell = 1;
         int markedCellsUsed = 0;
         if(MCCheck) markedCellsUsed++;
@@ -375,12 +390,12 @@ public class SmartPlayerTest implements MNKPlayer {
             if(MCCheck) j = 1;
             else j = 0;
             for(; j < B.K; j++){
-                getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, turnState, markedCellsUsed, cell.i+j, cell.j);
+                getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i+j, cell.j);
             }
         }
     }
 
-    public void mainDiagonalCheck(MNKCell[] MC, MNKCell[] FC, PriorityQueue<Pair> helpfulnessPQueue, MNKCellState turnState, MNKCell cell, boolean MCCheck){
+    public void mainDiagonalCheck(MNKCell[] MC, MNKCell[] FC, PriorityQueue<Pair> helpfulnessPQueue, boolean opponent, MNKCellState turnState, MNKCell cell, boolean MCCheck){
         int connectedCell = 1;
         int markedCellsUsed = 0;
         if(MCCheck) markedCellsUsed++;
@@ -397,12 +412,12 @@ public class SmartPlayerTest implements MNKPlayer {
             if(MCCheck) j = 1;
             else j = 0;
             for(; j < B.K; j++){
-                getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, turnState, markedCellsUsed, cell.i+j, cell.j+j);
+                getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i+j, cell.j+j);
             }
         }
     }
 
-    public void secondDiagonalCheck(MNKCell[] MC, MNKCell[] FC, PriorityQueue<Pair> helpfulnessPQueue, MNKCellState turnState, MNKCell cell, boolean MCCheck){
+    public void secondDiagonalCheck(MNKCell[] MC, MNKCell[] FC, PriorityQueue<Pair> helpfulnessPQueue, boolean opponent, MNKCellState turnState, MNKCell cell, boolean MCCheck){
         int connectedCell = 1;
         int markedCellsUsed = 0;
         if(MCCheck) markedCellsUsed++;
@@ -419,7 +434,7 @@ public class SmartPlayerTest implements MNKPlayer {
             if(MCCheck) j = 1;
             else j = 0;
             for(; j < B.K; j++){
-                getFreeCellsHelpfulness(FC, helpfulnessPQueue, false, turnState, markedCellsUsed, cell.i+j, cell.j-j);
+                getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i+j, cell.j-j);
             }
         }
     }
@@ -429,23 +444,24 @@ public class SmartPlayerTest implements MNKPlayer {
         if (c != null) {
             Object[] toUpdate = helpfulnessPQueue.toArray();
             boolean found = false;
-            int it = 0, originalCount = 0, originalPlayerCells = 0;
+            int it = 0, originalCount = 0, originalPlayerCells = 0, originalOpponentCells = 0;
             while (!found) {
                 Pair tmp = (Pair) toUpdate[it];
                 if (tmp.cell.equals(c)) {
                     originalCount = tmp.count;
                     originalPlayerCells = tmp.playerCells;
+                    originalOpponentCells = tmp.opponentCells;
                     found = true;
                 }
                 it++;
             }
-            helpfulnessPQueue.removeIf(p -> p.compareCells(new Pair(0, 0, c)));
+            helpfulnessPQueue.removeIf(p -> p.compareCells(new Pair(0, 0, 0, c)));
             if (B.gameState == MNKGameState.OPEN) {
                 if (!opponent){
                     B.markCell(c.i, c.j);
                     if(isWinningCell(c.i, c.j, toCheck)) {
                         markedCellsUsed = markedCellsUsed + 10000;
-                        helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, c));
+                        helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, originalOpponentCells, c));
                         B.unmarkCell();
                         return winType.PLAYER;
                     }else B.unmarkCell();
@@ -454,19 +470,19 @@ public class SmartPlayerTest implements MNKPlayer {
                     B.markCell(c.i, c.j);
                     if (isWinningCell(c.i, c.j, toCheck)) {
                         markedCellsUsed = markedCellsUsed + 1000;
-                        helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, c));
+                        helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, originalOpponentCells, c));
                         B.unmarkCell();
                         return winType.OPPONENT;
                     }else B.unmarkCell();
                 }
             }
             if(!opponent){
-                if(markedCellsUsed >= B.K-2) helpfulnessPQueue.add(new Pair(originalCount + 6 + markedCellsUsed, originalPlayerCells + markedCellsUsed, c));
-                else helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells+markedCellsUsed, c));
+                if(markedCellsUsed >= B.K-2) helpfulnessPQueue.add(new Pair(originalCount + 10 + markedCellsUsed, originalPlayerCells + markedCellsUsed, originalOpponentCells, c));
+                else helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells+markedCellsUsed, originalOpponentCells, c));
             }
             else{
-                if(markedCellsUsed >= B.K-2) helpfulnessPQueue.add(new Pair(originalCount + 6 + markedCellsUsed, originalPlayerCells, c));
-                else helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, c));
+                if(markedCellsUsed >= B.K-2) helpfulnessPQueue.add(new Pair(originalCount + 10 + markedCellsUsed, originalPlayerCells, originalOpponentCells + markedCellsUsed, c));
+                else helpfulnessPQueue.add(new Pair(originalCount + 1 + markedCellsUsed, originalPlayerCells, originalOpponentCells + markedCellsUsed, c));
             }
 
         }
