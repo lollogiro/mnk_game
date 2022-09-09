@@ -392,11 +392,15 @@ public class SmartPlayerTest implements MNKPlayer {
                     }
                     
                 }
-                else if(isFree(FC, cell.i, cell.j + B.K - 1)){
-                    getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i, cell.j + B.K - 1, true);
-                    j=1;
-                    for(; j < B.K - 1; j++){
-                        getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i, cell.j+j, true);
+                else if(isUsable(MC, FC, turnState, cell.i, cell.j)){
+                    if(isFree(FC, cell.i, cell.j - 1)){
+                        if(isFree(FC, cell.i, cell.j + B.K - 1)){
+                            getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i, cell.j + B.K - 1, true);
+                            j=1;
+                            for(; j < B.K - 1; j++){
+                                getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i, cell.j+j, true);
+                            }
+                        }
                     }
                 }
                 else{
@@ -455,11 +459,15 @@ public class SmartPlayerTest implements MNKPlayer {
                         }
                     }
                 }
-                else if(isFree(FC, cell.i + B.K - 1, cell.j)){
-                    getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i + B.K - 1, cell.j, true);
-                    j=1;
-                    for(; j < B.K - 1; j++){
-                        getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i+j, cell.j, true);
+                else if(isUsable(MC, FC, turnState, cell.i, cell.j)){
+                    if(isFree(FC, cell.i - 1, cell.j)){
+                        if(isFree(FC, cell.i + B.K - 1, cell.j)){
+                            getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i + B.K - 1, cell.j, true);
+                            j=1;
+                            for(; j < B.K - 1; j++){
+                                getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i+j, cell.j, true);
+                            }
+                        }
                     }
                 }
             }
@@ -512,11 +520,15 @@ public class SmartPlayerTest implements MNKPlayer {
                         }
                     }
                 }
-                else if(isFree(FC, cell.i + B.K - 1, cell.j + B.K - 1)){
-                    getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i + B.K - 1, cell.j + B.K - 1, true);
-                    j=1;
-                    for(; j < B.K; j++){
-                        getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i+j, cell.j+j, true);
+                else if(isUsable(MC, FC, turnState, cell.i, cell.j)){
+                    if(isFree(FC, cell.i- 1, cell.j- 1)){
+                        if(isFree(FC, cell.i + B.K - 1, cell.j + B.K - 1)){
+                            getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i + B.K - 1, cell.j + B.K - 1, true);
+                            j=1;
+                            for(; j < B.K; j++){
+                                getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i+j, cell.j+j, true);
+                            }
+                        }
                     }
                 }
             }
@@ -569,11 +581,15 @@ public class SmartPlayerTest implements MNKPlayer {
                         }
                     }
                 }
-                else if(isFree(FC, cell.i + B.K - 1, cell.j - B.K + 1)){
-                    getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i + B.K - 1, cell.j - B.K + 1, true);
-                    j=1;
-                    for(; j < B.K; j++){
-                        getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i+j, cell.j-j, true);
+                else if(isUsable(MC, FC, turnState, cell.i, cell.j)){
+                    if(isFree(FC, cell.i - 1, cell.j + 1)){
+                        if(isFree(FC, cell.i + B.K - 1, cell.j - B.K + 1)){
+                            getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i + B.K - 1, cell.j - B.K + 1, true);
+                            j=1;
+                            for(; j < B.K; j++){
+                                getFreeCellsHelpfulness(FC, helpfulnessPQueue, opponent, turnState, markedCellsUsed, cell.i+j, cell.j-j, true);
+                            }
+                        }
                     }
                 }
             }
