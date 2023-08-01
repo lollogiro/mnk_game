@@ -29,11 +29,11 @@ MNKPlayerTester application:
 
 - Output score only:
 
-	java -cp ".." mnkgame.MNKPlayerTester 5 5 4 mnkgame.RandomPlayer mnkgame.QuasiRandomPlayer
+	```java -cp ".." mnkgame.MNKPlayerTester 5 5 4 mnkgame.RandomPlayer mnkgame.QuasiRandomPlayer```
 
 - Verbose output
 
-	java -cp ".." mnkgame.MNKPlayerTester 5 5 4 mnkgame.RandomPlayer mnkgame.QuasiRandomPlayer -v
+	```java -cp ".." mnkgame.MNKPlayerTester 5 5 4 mnkgame.RandomPlayer mnkgame.QuasiRandomPlayer -v```
 
 
 - Verbose output and customized timeout (1 sec) and number of game repetitions (10 rounds)
