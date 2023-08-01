@@ -39,4 +39,4 @@ MNKPlayerTester application:
 - Verbose output and customized timeout (1 sec) and number of game repetitions (10 rounds)
 
 
-	java -cp ".." mnkgame.MNKPlayerTester 5 5 4 mnkgame.RandomPlayer mnkgame.QuasiRandomPlayer -v -t 1 -r 10
+	```java -cp ".." mnkgame.MNKPlayerTester 5 5 4 mnkgame.RandomPlayer mnkgame.QuasiRandomPlayer -v -t 1 -r 10```
