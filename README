@@ -1,3 +1,9 @@
+# *M-N-K* Game
+
+**The name of our implementation is Miliardario Ricco.**
+
+*Below there are some commands to execute the application.*
+
 - Command-line compile.  In the mnkgame/ directory run::
 
 		javac -cp ".." *.java
@@ -13,6 +19,10 @@ MNKGame application:
 - Computer vs Computer. In the mnkgame/ directory run:
 
 		java -cp ".." mnkgame.MNKGame 5 5 4 mnkgame.RandomPlayer mnkgame.QuasiRandomPlayer
+
+- Human vs MiliardarioRicco.  In the mnkgame/ directory run:
+	
+		java -cp ".." mnkgame.MNKGame <M> <N> <K> mnkgame.SmartPlayerTest
 
 
 MNKPlayerTester application:
